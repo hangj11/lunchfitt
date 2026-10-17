@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LunchFit 런치핏</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1EA; --surface:#FFFFFF; --surface-2:#F4F7F2; --ink:#1E2A22; --ink-2:#56645A; --line:#D3DCD1;
+  --yolk:#F0B323; --yolk-ink:#2E2300; --sage:#3F7A4A; --chili:#C2412A; --chili-soft:#F7DED8;
+  --walk:#6F9CC4; --wait:#E2964A; --eat:#58A066; --slack:#DCE4D9;
+  --display:'Do Hyeon','IBM Plex Sans KR',system-ui,sans-serif;
+  --body:'IBM Plex Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121714; --surface:#1B221D; --surface-2:#232C26; --ink:#E6EDE7; --ink-2:#A2B0A5; --line:#334036;
+    --yolk:#F2BE3A; --yolk-ink:#241B00; --sage:#7DBA86; --chili:#F0735C; --chili-soft:#3A221D;
+    --walk:#86B0D6; --wait:#E8A65E; --eat:#72B47F; --slack:#2A342D; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121714; --surface:#1B221D; --surface-2:#232C26; --ink:#E6EDE7; --ink-2:#A2B0A5; --line:#334036;
+  --yolk:#F2BE3A; --yolk-ink:#241B00; --sage:#7DBA86; --chili:#F0735C; --chili-soft:#3A221D;
+  --walk:#86B0D6; --wait:#E8A65E; --eat:#72B47F; --slack:#2A342D; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--yolk);outline-offset:2px;border-radius:6px}
+.wrap{max-width:600px;margin:0 auto;padding:0 18px 80px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-inner{max-width:600px;margin:0 auto;padding:12px 18px 0;display:flex;flex-direction:column;gap:10px}
+.brand{display:flex;align-items:baseline;justify-content:space-between}
+.logo{font-family:var(--display);font-size:26px;letter-spacing:-0.5px}
+.logo span{color:var(--sage)}
+.mode-note{font-size:12px;color:var(--ink-2)}
+nav.tabs{display:flex;gap:4px}
+nav.tabs button{flex:1;background:none;border:0;padding:10px 4px 12px;font-weight:600;color:var(--ink-2);border-bottom:3px solid transparent}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--yolk)}
+
+/* hero */
+.hero{padding:26px 0 8px}
+.hero h1{font-family:var(--display);font-weight:400;font-size:26px;line-height:1.25;margin:0 0 4px}
+.clock{display:flex;align-items:flex-end;gap:6px;margin:14px 0 4px}
+.clock .num{font-family:var(--display);font-size:104px;line-height:.85;letter-spacing:-3px;font-variant-numeric:tabular-nums}
+.clock .unit{font-family:var(--display);font-size:32px;padding-bottom:6px}
+.clock-sub{color:var(--ink-2);font-size:14px;margin-bottom:12px}
+input[type=range]{width:100%;accent-color:var(--sage);height:32px}
+.range-ends{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:-4px}
+
+.field{margin-top:26px}
+.field > .label{font-weight:700;font-size:15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline}
+.field > .label em{font-style:normal;font-family:var(--display);font-size:24px;font-weight:400}
+.hint{font-size:13px;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:500;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--ink);border-radius:12px;overflow:hidden}
+.seg button{background:var(--surface);border:0;padding:12px 4px;font-weight:600;border-right:1.5px solid var(--ink)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--yolk);color:var(--yolk-ink)}
+.cta-row{display:flex;flex-direction:column;gap:10px;margin-top:30px}
+.btn{border:0;border-radius:12px;padding:15px 18px;font-weight:700;font-size:16px;background:var(--ink);color:var(--bg)}
+.btn.alt{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn.small{padding:9px 14px;font-size:14px;border-radius:10px}
+.btn.warn{background:var(--chili);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;color:var(--sage);font-weight:600;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+
+/* results */
+.results-head{display:flex;justify-content:space-between;align-items:center;margin:22px 0 6px;gap:10px;flex-wrap:wrap}
+.results-head h2{font-family:var(--display);font-weight:400;font-size:24px;margin:0}
+select{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2);margin:4px 0 14px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card.pick{border:2px solid var(--ink)}
+.card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.card h3{margin:0;font-size:17px;line-height:1.35}
+.card .place{font-size:13px;color:var(--ink-2)}
+.price{font-family:var(--display);font-size:22px;white-space:nowrap;text-align:right;line-height:1.1}
+.price small{display:block;font-family:var(--body);font-size:12px;color:var(--ink-2)}
+.track{margin:14px 0 6px}
+.track-bar{position:relative;display:flex;height:14px;border-radius:4px;overflow:hidden;background:var(--slack)}
+.track-bar span{height:100%}
+.track-bar .over{background:repeating-linear-gradient(45deg,var(--chili) 0 4px,transparent 4px 8px)}
+.track-meta{display:flex;justify-content:space-between;font-size:13px;margin-top:6px;gap:8px;flex-wrap:wrap}
+.track-meta b{font-variant-numeric:tabular-nums}
+.ok{color:var(--sage);font-weight:600}
+.bad{color:var(--chili);font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:12px;padding:3px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink-2)}
+.tag.match{background:var(--ink);color:var(--bg)}
+.tag.warn{background:var(--chili-soft);color:var(--chili)}
+.card-actions{display:flex;gap:8px;margin-top:12px}
+.empty{background:var(--surface);border:1.5px dashed var(--line);border-radius:16px;padding:22px;text-align:center}
+.empty p{margin:0 0 12px}
+.notice{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:14px 0}
+
+/* modal */
+dialog{border:0;border-radius:20px;padding:0;max-width:560px;width:calc(100% - 24px);background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(10,16,12,.55)}
+.modal-body{padding:22px}
+.modal-body h2{font-family:var(--display);font-weight:400;font-size:26px;margin:0 0 2px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;font-size:14px;margin:16px 0}
+.kv dt{color:var(--ink-2)}
+.kv dd{margin:0}
+.unknown{color:var(--ink-2);font-style:italic}
+.close-x{float:right;background:none;border:0;font-size:22px;line-height:1;padding:4px 8px;color:var(--ink-2)}
+
+/* groups */
+.sect-title{font-family:var(--display);font-weight:400;font-size:24px;margin:24px 0 10px}
+.group-row{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.group-row b{display:block;font-size:16px}
+.status{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--surface-2);white-space:nowrap}
+.status.COLLECTING{background:var(--yolk);color:var(--yolk-ink)}
+.status.CONFIRMED,.status.COMPLETED{background:var(--sage);color:var(--bg)}
+.status.CANCELLED,.status.EXPIRED{background:var(--chili-soft);color:var(--chili)}
+form.stack{display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+form.stack label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+form.stack input,form.stack select{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface-2);font-weight:400}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.steps{display:flex;gap:4px;margin:12px 0 4px}
+.steps div{flex:1;font-size:11.5px;text-align:center;color:var(--ink-2)}
+.steps div::before{content:"";display:block;height:6px;border-radius:3px;background:var(--slack);margin-bottom:6px}
+.steps div.done::before{background:var(--sage)}
+.steps div.now{color:var(--ink);font-weight:700}
+.steps div.now::before{background:var(--yolk)}
+.people{width:100%;border-collapse:collapse;font-size:14px}
+.people th,.people td{padding:10px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.people th{font-size:12px;color:var(--ink-2);font-weight:600}
+.people td.num,.people th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.people tfoot td{font-weight:700;border-bottom:0}
+.tbl-wrap{overflow-x:auto}
+.toggle{display:inline-flex;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden}
+.toggle button{border:0;background:var(--surface);padding:8px 14px;font-weight:600}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.sum-check{font-size:13px;margin-top:8px}
+.order-line{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.qty{display:inline-flex;align-items:center;gap:6px}
+.qty button{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface-2);font-weight:700}
+.opt{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);margin-top:4px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:20;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
+.toast.show{opacity:1}
+textarea.share{width:100%;min-height:120px;border:1.5px solid var(--line);border-radius:10px;padding:10px;background:var(--surface-2);font:inherit;font-size:13px}
+.stars{display:flex;gap:4px}
+.stars button{background:none;border:0;font-size:26px;padding:0 2px;color:var(--line)}
+.stars button[aria-pressed="true"]{color:var(--yolk)}
+.stat-line{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0 16px}
+.stat-line div{font-size:13px;color:var(--ink-2)}
+.stat-line b{display:block;font-family:var(--display);font-weight:400;font-size:28px;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (min-width:640px){.clock .num{font-size:128px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><div class="logo">Lunch<span>Fit</span></div><div class="mode-note" id="modeNote">연결 확인 중…</div></div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="home" aria-selected="true">점심 추천</button>
+      <button role="tab" data-tab="group" aria-selected="false">함께 주문</button>
+      <button role="tab" data-tab="history" aria-selected="false">내 기록</button>
+    </nav>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<dialog id="modal"><div class="modal-body" id="modalBody"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------------- 샘플 데이터 (실제 매장 정보 아님) ---------------- */
+const RESTAURANTS = [
+  {id:'r1', name:'오늘한상', kind:'한식 백반', walk:4, wait:3, eat:18, modes:['dine'], solo:true, hours:'11:00–21:00', sauce:null,
+   menus:[{id:'m1',name:'제육 백반',price:8500,full:5,tags:['filling','mild'],comp:'제육볶음, 쌀밥, 된장국, 반찬 4종'},
+          {id:'m2',name:'된장찌개 정식',price:8000,full:4,tags:['mild','cheap'],comp:'된장찌개, 쌀밥, 반찬 4종'},
+          {id:'m3',name:'고등어구이 정식',price:9500,full:4,tags:['protein','mild'],comp:'고등어구이, 쌀밥, 미역국, 반찬 3종'}]},
+  {id:'r2', name:'그린볼', kind:'샐러드·포케', walk:6, wait:7, eat:12, modes:['dine','pickup'], solo:true, hours:'10:30–20:00', sauce:'별도 용기 제공',
+   toppings:[{id:'t1',name:'닭가슴살 추가',price:2000},{id:'t2',name:'잡곡밥 추가',price:1000}],
+   menus:[{id:'m4',name:'닭가슴살 샐러드',price:9900,full:3,tags:['healthy','protein','takeout'],comp:'닭가슴살, 채소, 방울토마토, 삶은 달걀'},
+          {id:'m5',name:'연어 포케',price:11500,full:4,tags:['healthy','protein','takeout'],comp:'연어, 잡곡밥, 아보카도, 채소'},
+          {id:'m6',name:'두부 곡물볼',price:9500,full:4,tags:['healthy','takeout'],comp:'구운 두부, 귀리·현미, 채소'}]},
+  {id:'r3', name:'면옥당', kind:'국수', walk:3, wait:5, eat:10, modes:['dine'], solo:true, hours:'11:00–15:00, 17:00–20:00', sauce:null,
+   menus:[{id:'m7',name:'잔치국수',price:6500,full:3,tags:['fast','cheap','mild'],comp:'소면, 멸치 육수, 고명'},
+          {id:'m8',name:'비빔국수',price:7500,full:3,tags:['fast','cheap'],comp:'소면, 매콤 양념, 채소'},
+          {id:'m9',name:'냉모밀',price:8000,full:3,tags:['fast','cheap'],comp:'메밀면, 쯔유, 무즙'}]},
+  {id:'r4', name:'김밥상회', kind:'분식', walk:2, wait:2, eat:8, modes:['dine','pickup'], solo:true, hours:'07:30–19:00', sauce:null,
+   menus:[{id:'m10',name:'참치김밥',price:4500,full:3,tags:['fast','cheap','takeout'],comp:'참치마요, 단무지, 채소'},
+          {id:'m11',name:'라볶이',price:7000,full:4,tags:['cheap','filling'],comp:'떡, 라면사리, 어묵, 삶은 달걀'},
+          {id:'m12',name:'김밥 라면 세트',price:7500,full:5,tags:['fast','cheap','filling'],comp:'야채김밥 1줄, 라면'}]},
+  {id:'r5', name:'정돈까스', kind:'일식 돈까스', walk:8, wait:12, eat:15, modes:['dine'], solo:false, hours:'11:30–21:00', sauce:'테이블 비치',
+   menus:[{id:'m13',name:'등심돈까스',price:11000,full:5,tags:['filling','protein'],comp:'등심까스, 밥, 장국, 양배추'},
+          {id:'m14',name:'치즈돈까스',price:12500,full:5,tags:['filling'],comp:'치즈까스, 밥, 장국, 양배추'}]},
+  {id:'r6', name:'포하노이', kind:'베트남 쌀국수', walk:6, wait:6, eat:15, modes:['dine','pickup'], solo:true, hours:'11:00–21:30', sauce:'별도 제공',
+   menus:[{id:'m15',name:'양지 쌀국수',price:10500,full:4,tags:['mild','protein'],comp:'쌀국수, 소고기 양지, 숙주'},
+          {id:'m16',name:'분짜',price:12000,full:4,tags:['protein'],comp:'쌀면, 숯불 돼지고기, 채소, 느억맘 소스'}]},
+  {id:'r7', name:'속편한죽집', kind:'죽', walk:5, wait:5, eat:12, modes:['dine','pickup'], solo:true, hours:'09:00–20:00', sauce:null,
+   menus:[{id:'m17',name:'야채죽',price:8000,full:3,tags:['healthy','mild','takeout','cheap'],comp:'쌀, 당근, 애호박, 버섯'},
+          {id:'m18',name:'전복죽',price:11000,full:4,tags:['healthy','mild','protein','takeout'],comp:'쌀, 전복, 참기름'}]},
+  {id:'r8', name:'랩앤샌드', kind:'샌드위치·랩', walk:5, wait:4, eat:10, modes:['dine','pickup'], solo:true, hours:'08:00–19:00', sauce:'선택 가능',
+   toppings:[{id:'t3',name:'달걀 추가',price:800}],
+   menus:[{id:'m19',name:'닭가슴살 랩',price:7900,full:3,tags:['protein','healthy','takeout','fast','cheap'],comp:'통밀 토르티야, 닭가슴살, 채소'},
+          {id:'m20',name:'에그 샌드위치',price:6500,full:3,tags:['fast','cheap','takeout','mild'],comp:'식빵, 에그마요'}]},
+  {id:'r9', name:'든든도시락', kind:'도시락 배달', delivery:25, deliveryFee:2500, eat:12, modes:['delivery'], solo:true, hours:'10:00–14:00', sauce:null,
+   menus:[{id:'m21',name:'제육 도시락',price:8900,full:5,tags:['filling','takeout'],comp:'제육볶음, 밥, 반찬 3종'},
+          {id:'m22',name:'불고기 도시락',price:9500,full:5,tags:['filling','mild','takeout'],comp:'소불고기, 밥, 반찬 3종'},
+          {id:'m23',name:'닭가슴살 현미 도시락',price:9800,full:4,tags:['healthy','protein','takeout'],comp:'닭가슴살, 현미밥, 브로콜리'}]},
+  {id:'r10', name:'마라공방', kind:'중식 마라', walk:7, wait:10, eat:15, modes:['dine','delivery'], delivery:35, deliveryFee:3000, solo:true, hours:'11:00–22:00', sauce:null,
+   menus:[{id:'m24',name:'마라탕 (1인)',price:10000,full:4,tags:['filling'],comp:'선택 재료, 마라 육수'},
+          {id:'m25',name:'꿔바로우 세트',price:13000,full:5,tags:['filling'],comp:'꿔바로우, 볶음밥 소'}]}
+];
+const PREFS = [
+  {id:'fast',label:'빠른 식사'},{id:'filling',label:'든든하게'},{id:'healthy',label:'건강하게'},
+  {id:'cheap',label:'저렴하게'},{id:'protein',label:'단백질'},{id:'mild',label:'무난한 맛'},{id:'takeout',label:'포장·픽업'}
+];
+const PREF_LABEL = Object.fromEntries(PREFS.map(p=>[p.id,p.label]));
+const MODE_LABEL = {dine:'매장 식사', pickup:'포장 픽업', delivery:'배달'};
+const STATUS_LABEL = {CREATED:'생성됨', COLLECTING:'메뉴 취합 중', REVIEW:'검토 중', CONFIRMED:'주문 확정', COMPLETED:'완료', CANCELLED:'취소됨', EXPIRED:'마감 지남'};
+const STEP_ORDER = ['COLLECTING','REVIEW','CONFIRMED','COMPLETED'];
+
+/* ---------------- 유틸 ---------------- */
+const $ = s => document.querySelector(s);
+const won = n => Math.round(n).toLocaleString('ko-KR') + '원';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const hhmm = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const findR = id => RESTAURANTS.find(r => r.id === id);
+const findMenu = (r, mid) => r && r.menus.find(m => m.id === mid);
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2200); }
+const ls = {
+  get(k, d){ try{ const v=localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* ---------------- 상태 ---------------- */
+const saved = ls.get('lf-prefs', null);
+const state = {
+  tab:'home',
+  minutes: saved?.minutes ?? 50,
+  budget: saved?.budget ?? 10000,
+  prefs: new Set(saved?.prefs ?? []),
+  meal: saved?.meal ?? 'solo',
+  sort:'auto',
+  showResults:false,
+  groupView:'list', currentGroup:null,
+  groups:[], group:null, orders:{},
+  myId:null, profiles:{}, shared:false, canWrite:true,
+  history: ls.get('lf-history', [])
+};
+function savePrefs(){ ls.set('lf-prefs', {minutes:state.minutes, budget:state.budget, prefs:[...state.prefs], meal:state.meal}); }
+
+/* ---------------- 추천 로직 (규칙 기반) ---------------- */
+function candidates(){
+  const out = [];
+  for (const r of RESTAURANTS){
+    let mode;
+    if (state.meal === 'takeout') mode = r.modes.includes('pickup') ? 'pickup' : r.modes.includes('delivery') ? 'delivery' : null;
+    else mode = r.modes.includes('dine') ? 'dine' : r.modes.includes('delivery') ? 'delivery' : null;
+    if (!mode) continue;
+    for (const m of r.menus){
+      let seg;
+      if (mode === 'dine') seg = [{k:'walk',v:r.walk,l:'이동'},{k:'wait',v:r.wait,l:'대기'},{k:'eat',v:r.eat,l:'식사'},{k:'walk',v:r.walk,l:'복귀'}];
+      else if (mode === 'pickup') seg = [{k:'walk',v:r.walk,l:'이동'},{k:'wait',v:r.wait,l:'준비'},{k:'walk',v:r.walk,l:'복귀'},{k:'eat',v:12,l:'식사'}];
+      else seg = [{k:'wait',v:r.delivery,l:'배달'},{k:'eat',v:12,l:'식사'}];
+      const total = seg.reduce((a,s)=>a+s.v,0);
+      const fee = mode === 'delivery' ? (r.deliveryFee||0) : 0;
+      const cost = m.price + fee;
+      const matches = [...state.prefs].filter(p => m.tags.includes(p));
+      const warns = [];
+      if (state.meal === 'solo' && !r.solo) warns.push('1인석 정보 없음');
+      out.push({r, m, mode, seg, total, cost, fee, matches, warns,
+        slack: state.minutes - total, inTime: total <= state.minutes, inBudget: cost <= state.budget});
+    }
+  }
+  const sorters = {
+    fast:(a,b)=>a.total-b.total,
+    budget:(a,b)=>a.cost-b.cost,
+    full:(a,b)=>b.m.full-a.m.full || a.total-b.total,
+    match:(a,b)=>b.matches.length-a.matches.length || a.total-b.total,
+    auto:(a,b)=>(b.matches.length-a.matches.length) || (a.total-b.total)
+  };
+  let key = state.sort;
+  if (key === 'auto' && state.prefs.size === 0) key = 'fast';
+  return out.sort(sorters[key]);
+}
+
+/* ---------------- 렌더: 홈 ---------------- */
+function renderHome(){
+  const back = new Date(Date.now() + state.minutes*60000);
+  const prefChips = PREFS.map(p=>`<button class="chip" data-pref="${p.id}" aria-pressed="${state.prefs.has(p.id)}">${p.label}</button>`).join('');
+  let html = `
+  <section class="hero">
+    <h1>오늘 몇 분 안에 먹고 돌아와야 하나요?</h1>
+    <div class="clock" aria-hidden="true"><span class="num" id="minNum">${state.minutes}</span><span class="unit">분</span></div>
+    <div class="clock-sub" id="minSub">지금 출발하면 ${hhmm(back)}까지 자리로 돌아오는 일정이에요.</div>
+    <label class="sr" for="minRange" style="position:absolute;left:-9999px">식사 가능 시간</label>
+    <input type="range" id="minRange" min="20" max="90" step="5" value="${state.minutes}" aria-label="식사 가능 시간(분)">
+    <div class="range-ends"><span>20분</span><span>90분</span></div>
+  </section>
+  <div class="field">
+    <div class="label">1인 예산 <em id="budNum">${won(state.budget)}</em></div>
+    <input type="range" id="budRange" min="5000" max="20000" step="500" value="${state.budget}" aria-label="1인 예산(원)">
+    <div class="range-ends"><span>5,000원</span><span>20,000원</span></div>
+  </div>
+  <div class="field">
+    <div class="label">무엇이 중요하세요? <span class="hint">여러 개 선택 가능</span></div>
+    <div class="chips">${prefChips}</div>
+  </div>
+  <div class="field">
+    <div class="label">어떻게 드시나요?</div>
+    <div class="seg" role="group" aria-label="식사 형태">
+      <button data-meal="solo" aria-pressed="${state.meal==='solo'}">혼밥</button>
+      <button data-meal="together" aria-pressed="${state.meal==='together'}">동료와</button>
+      <button data-meal="takeout" aria-pressed="${state.meal==='takeout'}">포장·배달</button>
+    </div>
+  </div>
+  <div class="cta-row">
+    <button class="btn" id="goRecommend">점심 추천받기</button>
+    <button class="btn alt" id="goGroup">함께 주문하기</button>
+  </div>`;
+  if (state.showResults) html += renderResults();
+  $('#app').innerHTML = html;
+}
+
+function trackHTML(c){
+  const span = Math.max(state.minutes, c.total);
+  const parts = c.seg.map(s=>`<span style="width:${(s.v/span*100).toFixed(2)}%;background:var(--${s.k})" title="${s.l} ${s.v}분"></span>`).join('');
+  const over = c.total > state.minutes ? `<span class="over" style="width:0;flex:1"></span>` : '';
+  const desc = c.seg.map(s=>`${s.l} ${s.v}분`).join(' + ');
+  return `<div class="track" aria-label="${esc(desc)}, 총 ${c.total}분">
+    <div class="track-bar">${parts}${over}</div>
+    <div class="track-meta"><span>${esc(desc)} = <b>${c.total}분</b></span>
+    ${c.inTime ? `<span class="ok">${c.slack}분 여유</span>` : `<span class="bad">${-c.slack}분 초과 가능성</span>`}</div>
+  </div>`;
+}
+
+function cardHTML(c, idx){
+  const tags = [
+    `<span class="tag">${MODE_LABEL[c.mode]}</span>`,
+    `<span class="tag">포만감 ${'●'.repeat(c.m.full)}${'○'.repeat(5-c.m.full)}</span>`,
+    ...c.m.tags.map(t=>`<span class="tag ${c.matches.includes(t)?'match':''}">${PREF_LABEL[t]}</span>`),
+    ...c.warns.map(w=>`<span class="tag warn">${w}</span>`),
+    !c.inBudget ? `<span class="tag warn">예산 ${won(c.cost-state.budget)} 초과</span>` : ''
+  ].join('');
+  return `<article class="card ${idx===0 && c.inTime && c.inBudget ? 'pick':''}">
+    <div class="card-top">
+      <div><h3>${esc(c.m.name)}</h3><div class="place">${esc(c.r.name)}, ${esc(c.r.kind)}</div></div>
+      <div class="price">${won(c.cost)}${c.fee?`<small>배달비 ${won(c.fee)} 포함</small>`:''}</div>
+    </div>
+    ${trackHTML(c)}
+    <div class="tags">${tags}</div>
+    <div class="card-actions">
+      <button class="btn small alt" data-detail="${c.r.id}|${c.m.id}|${c.mode}">상세 보기</button>
+      <button class="btn small" data-choose="${c.r.id}|${c.m.id}|${c.mode}">이 메뉴로 결정</button>
+    </div>
+  </article>`;
+}
+
+function renderResults(){
+  const all = candidates();
+  const fit = all.filter(c=>c.inTime && c.inBudget);
+  const near = all.filter(c=>!(c.inTime && c.inBudget)).sort((a,b)=>(Math.max(0,-a.slack)+Math.max(0,a.cost-state.budget)/1000)-(Math.max(0,-b.slack)+Math.max(0,b.cost-state.budget)/1000)).slice(0,3);
+  let h = `<section id="results">
+  <div class="results-head"><h2>${fit.length ? `조건에 맞는 메뉴 ${fit.length}개` : '조건에 맞는 메뉴가 없어요'}</h2>
+    <label><span style="position:absolute;left:-9999px">정렬</span>
+    <select id="sortSel" aria-label="정렬">
+      <option value="auto" ${state.sort==='auto'?'selected':''}>추천 순</option>
+      <option value="fast" ${state.sort==='fast'?'selected':''}>가장 빠른 순</option>
+      <option value="budget" ${state.sort==='budget'?'selected':''}>가격 낮은 순</option>
+      <option value="full" ${state.sort==='full'?'selected':''}>포만감 우선</option>
+      <option value="match" ${state.sort==='match'?'selected':''}>취향 일치 순</option>
+    </select></label></div>
+  <div class="legend"><span><i style="background:var(--walk)"></i>이동</span><span><i style="background:var(--wait)"></i>대기·준비·배달</span><span><i style="background:var(--eat)"></i>식사</span><span><i style="background:var(--slack)"></i>남는 시간</span></div>`;
+  if (fit.length){
+    h += fit.map(cardHTML).join('');
+  } else {
+    h += `<div class="empty"><p>${state.minutes}분, ${won(state.budget)} 안에서는 찾지 못했어요. 조건을 조금 넓혀 볼까요?</p>
+      <div class="chips" style="justify-content:center">
+        <button class="chip" data-relax="time">시간 +10분</button>
+        <button class="chip" data-relax="budget">예산 +2,000원</button>
+        ${state.prefs.size?'<button class="chip" data-relax="prefs">취향 조건 해제</button>':''}
+      </div></div>`;
+  }
+  if (near.length){
+    h += `<h2 class="sect-title" style="font-size:19px">조금만 넘는 선택지</h2>` + near.map(c=>cardHTML(c,99)).join('');
+  }
+  h += `<p class="notice">지금 보이는 식당과 시간은 서비스 검증용 샘플 데이터예요. 실제 대기시간, 영업 여부, 예약·웨이팅은 매장 연동 후 제공됩니다.</p></section>`;
+  return h;
+}
+
+/* ---------------- 상세 모달 ---------------- */
+function openDetail(rid, mid, mode){
+  const r = findR(rid), m = findMenu(r, mid);
+  const c = candidates().find(x=>x.r.id===rid && x.m.id===mid) || null;
+  const toppings = r.toppings ? r.toppings.map(t=>`${esc(t.name)} +${won(t.price)}`).join(', ') : null;
+  $('#modalBody').innerHTML = `
+    <button class="close-x" data-close aria-label="닫기">×</button>
+    <h2>${esc(m.name)}</h2>
+    <div class="place">${esc(r.name)}, ${esc(r.kind)}</div>
+    ${c ? trackHTML(c) : ''}
+    <dl class="kv">
+      <dt>가격</dt><dd>${won(m.price)}${mode==='delivery'?` + 배달비 ${won(r.deliveryFee)}`:''}</dd>
+      <dt>메뉴 구성</dt><dd>${esc(m.comp)}</dd>
+      <dt>포만감</dt><dd>${m.full} / 5 (샘플 평가)</dd>
+      <dt>추가 토핑</dt><dd>${toppings || '<span class="unknown">없음</span>'}</dd>
+      <dt>소스 제공</dt><dd>${r.sauce ? esc(r.sauce) : '<span class="unknown">정보 확인 중</span>'}</dd>
+      <dt>영양 정보</dt><dd><span class="unknown">정보 확인 중</span></dd>
+      <dt>영업시간</dt><dd>${esc(r.hours)}</dd>
+      <dt>이용 방식</dt><dd>${r.modes.map(x=>MODE_LABEL[x]).join(', ')}</dd>
+      <dt>예약·웨이팅</dt><dd><span class="unknown">연동 전이에요. 매장에 직접 방문하거나 전화로 확인해 주세요.</span></dd>
+    </dl>
+    <div class="cta-row" style="margin-top:8px">
+      <button class="btn" data-choose="${rid}|${mid}|${mode}">이 메뉴로 결정</button>
+      ${r.modes.some(x=>x!=='dine') ? `<button class="btn alt" data-group-from="${rid}">이 식당으로 함께 주문</button>` : ''}
+    </div>`;
+  $('#modal').showModal();
+}
+
+function choose(rid, mid, mode){
+  const r = findR(rid), m = findMenu(r, mid);
+  const c = candidates().find(x=>x.r.id===rid && x.m.id===mid);
+  state.history.unshift({id:'h'+Date.now(), at:Date.now(), rid, mid, mode, est:c?c.total:null, cost:c?c.cost:m.price, rating:null, actual:null});
+  state.history = state.history.slice(0,30);
+  ls.set('lf-history', state.history);
+  if ($('#modal').open) $('#modal').close();
+  toast(`${m.name}(으)로 결정했어요. 다녀와서 내 기록에서 평가해 주세요.`);
+}
+
+/* ---------------- 내 기록 ---------------- */
+function renderHistory(){
+  const h = state.history;
+  const rated = h.filter(x=>x.rating);
+  const timed = h.filter(x=>x.actual && x.est);
+  const avgR = rated.length ? (rated.reduce((a,x)=>a+x.rating,0)/rated.length).toFixed(1) : '–';
+  const avgErr = timed.length ? Math.round(timed.reduce((a,x)=>a+(x.actual-x.est),0)/timed.length) : null;
+  let html = `<h2 class="sect-title">내 점심 기록</h2>`;
+  if (!h.length){
+    $('#app').innerHTML = html + `<div class="empty"><p>아직 결정한 점심이 없어요. 추천을 받고 메뉴를 결정하면 여기에 쌓여요.</p><button class="btn small" data-tab-go="home">점심 추천받기</button></div>`;
+    return;
+  }
+  html += `<div class="stat-line"><div><b>${h.length}회</b>결정한 점심</div><div><b>${avgR}</b>평균 만족도</div>
+    <div><b>${avgErr===null?'–':(avgErr>0?'+':'')+avgErr+'분'}</b>예상 대비 실제 시간</div></div>`;
+  html += h.map(x=>{
+    const r=findR(x.rid), m=findMenu(r,x.mid); if(!m) return '';
+    const d=new Date(x.at);
+    return `<article class="card">
+      <div class="card-top"><div><h3>${esc(m.name)}</h3><div class="place">${esc(r.name)}, ${d.getMonth()+1}월 ${d.getDate()}일 ${hhmm(d)}</div></div>
+      <div class="price">${won(x.cost)}<small>예상 ${x.est ?? '–'}분</small></div></div>
+      <div style="margin-top:12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+        <div class="stars" role="group" aria-label="만족도">${[1,2,3,4,5].map(n=>`<button data-rate="${x.id}|${n}" aria-pressed="${(x.rating||0)>=n}" aria-label="${n}점">★</button>`).join('')}</div>
+        <label style="font-size:13px;color:var(--ink-2)">실제 걸린 시간 <input type="number" min="5" max="180" inputmode="numeric" data-actual="${x.id}" value="${x.actual ?? ''}" style="width:70px;border:1.5px solid var(--line);border-radius:8px;padding:6px;background:var(--surface-2)"> 분</label>
+      </div></article>`;
+  }).join('');
+  html += `<p class="notice">기록은 이 브라우저에만 저장돼요. 만족도와 실제 시간은 추천 품질을 개선하는 데 쓰입니다.</p>`;
+  $('#app').innerHTML = html;
+}
+
+/* ---------------- 저장소: 공유(db) 또는 이 기기(로컬) ---------------- */
+const local = { groups:{}, orders:{}, subs:new Set() };
+function localNotify(){ local.subs.forEach(f=>f()); }
+const store = {
+  db:null,
+  async createGroup(data){
+    if (this.db){ const ref = this.db.collection('groups').doc(); await ref.set(data); return ref.id; }
+    const id='g'+Date.now(); local.groups[id]={...data}; local.orders[id]={}; localNotify(); return id;
+  },
+  async updateGroup(id, patch){
+    if (this.db) return this.db.doc('groups/'+id).update(patch);
+    Object.assign(local.groups[id], patch); localNotify();
+  },
+  async setOrder(gid, uid, data){
+    if (this.db) return this.db.doc('groups/'+gid+'/orders/'+uid).set(data);
+    local.orders[gid][uid] = data; localNotify();
+  },
+  async deleteOrder(gid, uid){
+    if (this.db) return this.db.doc('groups/'+gid+'/orders/'+uid).delete();
+    delete local.orders[gid][uid]; localNotify();
+  },
+  watchGroups(cb){
+    if (this.db) return this.db.collection('groups').orderBy('createdAt','desc').limit(30)
+      .onSnapshot(s=>cb(s.docs.map(d=>({id:d.id, ...d.data()}))), e=>console.warn(e));
+    const f=()=>cb(Object.entries(local.groups).map(([id,g])=>({id,...g})).sort((a,b)=>b.createdAt-a.createdAt));
+    local.subs.add(f); f(); return ()=>local.subs.delete(f);
+  },
+  watchGroup(gid, onGroup, onOrders){
+    if (this.db){
+      const u1 = this.db.doc('groups/'+gid).onSnapshot(s=>onGroup(s.exists?{id:gid,...s.data()}:null), e=>console.warn(e));
+      const u2 = this.db.collection('groups/'+gid+'/orders').onSnapshot(s=>{ const o={}; s.docs.forEach(d=>o[d.id]=d.data()); onOrders(o); }, e=>console.warn(e));
+      return ()=>{u1();u2();};
+    }
+    const f=()=>{ onGroup(local.groups[gid]?{id:gid,...local.groups[gid]}:null); onOrders({...local.orders[gid]}); };
+    local.subs.add(f); f(); return ()=>local.subs.delete(f);
+  }
+};
+
+/* ---------------- 정산 계산 ---------------- */
+function lineAmount(r, it){
+  const m = findMenu(r, it.menuId); if(!m) return 0;
+  const tops = (it.toppings||[]).reduce((a,tid)=>a+((r.toppings||[]).find(t=>t.id===tid)?.price||0),0);
+  return (m.price + tops) * (it.qty||1);
+}
+function settle(g, orders){
+  const r = findR(g.restaurantId);
+  const snap = g.snapshot;
+  let people = snap ? snap.map(p=>({uid:p.uid, food:p.food, lines:p.lines}))
+    : Object.entries(orders).filter(([,o])=>o.items && o.items.length).sort((a,b)=>(a[1].joinedAt||0)-(b[1].joinedAt||0))
+      .map(([uid,o])=>({uid, food:o.items.reduce((a,it)=>a+lineAmount(r,it),0),
+        lines:o.items.map(it=>{const m=findMenu(r,it.menuId); const tn=(it.toppings||[]).map(t=>(r.toppings||[]).find(x=>x.id===t)?.name).filter(Boolean); return `${m?m.name:'?'}${tn.length?' ('+tn.join(', ')+')':''} ×${it.qty}`;})}));
+  const n = people.length;
+  const F = people.reduce((a,p)=>a+p.food,0);
+  const D = Math.max(0, +g.deliveryFee||0), X = Math.max(0, +g.extra||0);
+  const S = Math.min(Math.max(0, +g.discount||0), F + D + X);
+  const T = F + D + X - S;
+  if (!n) return {people, n, F, D, X, S, T, ok:true};
+  const splitEven = (amt) => { const b=Math.floor(amt/n), rem=amt-b*n; return people.map((_,i)=>b+(i<rem?1:0)); };
+  if (g.method === 'equal'){
+    const share = splitEven(T);
+    people.forEach((p,i)=>{p.pay=share[i];});
+  } else {
+    const dS = splitEven(D), xS = splitEven(X);
+    let disc = people.map(p => F ? Math.floor(S*p.food/F) : 0);
+    let rem = S - disc.reduce((a,b)=>a+b,0);
+    const order = people.map((p,i)=>i).sort((a,b)=>people[b].food-people[a].food);
+    for (let k=0; rem>0; k=(k+1)%n){ disc[order[k]]++; rem--; }
+    people.forEach((p,i)=>{p.deliv=dS[i]; p.ext=xS[i]; p.disc=disc[i]; p.pay=p.food+dS[i]+xS[i]-disc[i];});
+  }
+  const sum = people.reduce((a,p)=>a+p.pay,0);
+  return {people, n, F, D, X, S, T, sum, ok: sum===T};
+}
+
+/* ---------------- 렌더: 함께 주문 ---------------- */
+let unsubGroups=null, unsubGroup=null;
+function personName(uid){
+  const nick = state.orders[uid] && state.orders[uid].nick;
+  if (uid === state.myId) return nick ? nick + ' (나)' : '나';
+  if (nick) return nick;
+  if (uid.startsWith('local:')) return uid.slice(6);
+  return (state.profiles[uid] && state.profiles[uid].name) || '참여자';
+}
+async function resolveProfiles(ids){
+  if (!userCap || !ids.length) return;
+  try{ const ps = await userCap.profiles(ids); let changed=false;
+    for (const id of ids){ const nm = ps[id]?.name || ''; if ((state.profiles[id]?.name||'') !== nm){ state.profiles[id]={name:nm}; changed=true; } }
+    if (changed && state.tab==='group') renderGroup();
+  }catch(e){}
+}
+function effectiveStatus(g){
+  if (g.status === 'COLLECTING' && g.deadline && Date.now() > g.deadline) return 'EXPIRED';
+  return g.status;
+}
+function renderGroup(){
+  if (state.groupView === 'detail' && state.group) return renderGroupDetail();
+  if (state.groupView === 'new') return renderGroupNew();
+  const rows = state.groups.map(g=>{
+    const r = findR(g.restaurantId); const st = effectiveStatus(g);
+    const dl = g.deadline ? new Date(g.deadline) : null;
+    return `<button class="group-row" data-open-group="${g.id}"><span><b>${esc(g.name)}</b><span class="place">${esc(r?r.name:'')}${dl?`, ${hhmm(dl)} 마감`:''}</span></span><span class="status ${st}">${STATUS_LABEL[st]}</span></button>`;
+  }).join('');
+  $('#app').innerHTML = `
+    <h2 class="sect-title">함께 주문하기</h2>
+    <p class="hint" style="margin-top:-4px">그룹을 만들고 이 페이지 링크를 동료에게 보내면, 각자 메뉴를 골라 제출해요. 주문이 모이면 1/N 정산 금액이 자동으로 계산됩니다.</p>
+    <div class="cta-row" style="margin-top:14px"><button class="btn" data-group-new ${state.canWrite?'':'disabled'}>새 그룹 주문 만들기</button></div>
+    ${state.canWrite?'':'<p class="notice">보기 권한만 있어 그룹을 만들거나 메뉴를 제출할 수 없어요. 링크를 공유한 사람에게 참여 권한을 요청해 주세요.</p>'}
+    <h2 class="sect-title" style="font-size:19px">진행 중인 그룹</h2>
+    ${rows || '<div class="empty"><p>아직 그룹 주문이 없어요. 첫 그룹을 만들어 동료를 초대해 보세요.</p></div>'}
+    ${store.db?'':'<p class="notice">공유 저장소에 연결되지 않아 이 기기에서만 동작하는 체험 모드예요. 체험 모드에서는 참여자를 직접 추가해 정산을 시험해 볼 수 있어요.</p>'}`;
+}
+function renderGroupNew(){
+  const opts = RESTAURANTS.filter(r=>r.modes.some(m=>m!=='dine')).map(r=>`<option value="${r.id}" ${state.prefillR===r.id?'selected':''}>${esc(r.name)} (${r.modes.filter(m=>m!=='dine').map(m=>MODE_LABEL[m]).join('·')})</option>`).join('');
+  const dl = new Date(Date.now()+30*60000);
+  const rSel = findR(state.prefillR) || RESTAURANTS.find(r=>r.modes.some(m=>m!=='dine'));
+  $('#app').innerHTML = `
+    <p><button class="link" data-group-list>← 그룹 목록</button></p>
+    <h2 class="sect-title" style="margin-top:4px">새 그룹 주문</h2>
+    <form class="stack" id="newGroupForm">
+      <label>그룹 이름<input name="name" required maxlength="30" placeholder="예: 기획팀 금요일 점심"></label>
+      <label>주문할 식당<select name="restaurantId" id="newGroupR">${opts}</select></label>
+      <div class="two">
+        <label>주문 마감<input type="time" name="deadline" value="${hhmm(dl)}" required></label>
+        <label>배달비 (원)<input type="number" name="deliveryFee" min="0" step="100" value="${rSel&&rSel.modes.includes('delivery')?rSel.deliveryFee:0}" id="newGroupFee"></label>
+      </div>
+      <div class="two">
+        <label>할인 (원)<input type="number" name="discount" min="0" step="100" value="0"></label>
+        <label>추가 비용 (원)<input type="number" name="extra" min="0" step="100" value="0"></label>
+      </div>
+      <p class="hint" style="margin:0">배달비와 추가 비용은 참여자 균등 분할, 할인은 개인 음식 금액에 비례해 배분해요.</p>
+      <button class="btn" type="submit">그룹 만들고 메뉴 받기</button>
+    </form>`;
+}
+function renderGroupDetail(){
+  const g = state.group; const r = findR(g.restaurantId);
+  const st = effectiveStatus(g);
+  const isLeader = g.createdBy === state.myId;
+  const mine = state.orders[state.myId];
+  const editable = (st === 'COLLECTING' || st === 'CREATED') && state.canWrite;
+  const res = settle(g, state.orders);
+  const stepIdx = STEP_ORDER.indexOf(st === 'EXPIRED' ? 'COLLECTING' : st);
+  const steps = STEP_ORDER.map((s,i)=>`<div class="${i<stepIdx?'done':i===stepIdx?'now':''}">${STATUS_LABEL[s]}</div>`).join('');
+  const dl = g.deadline ? new Date(g.deadline) : null;
+  const leftMin = dl ? Math.round((g.deadline-Date.now())/60000) : null;
+
+  // 내 메뉴
+  const draft = state.draft || (mine ? JSON.parse(JSON.stringify(mine.items)) : []);
+  state.draft = draft;
+  const menuRows = r.menus.map(m=>{
+    const it = draft.find(x=>x.menuId===m.id); const q = it ? it.qty : 0;
+    const tops = (r.toppings||[]).map(t=>`<label class="opt"><input type="checkbox" data-top="${m.id}|${t.id}" ${it&&it.toppings&&it.toppings.includes(t.id)?'checked':''} ${q&&editable?'':'disabled'}> ${esc(t.name)} +${won(t.price)}</label>`).join('');
+    return `<div class="order-line"><div><b>${esc(m.name)}</b> <span class="hint">${won(m.price)}</span>${tops}</div>
+      <div class="qty"><button data-qty="${m.id}|-1" aria-label="${esc(m.name)} 빼기" ${editable?'':'disabled'}>−</button><span aria-live="polite" style="min-width:18px;text-align:center">${q}</span><button data-qty="${m.id}|1" aria-label="${esc(m.name)} 추가" ${editable?'':'disabled'}>+</button></div></div>`;
+  }).join('');
+  const draftTotal = draft.reduce((a,it)=>a+lineAmount(r,it),0);
+
+  // 참여자 표
+  const isEqual = g.method === 'equal';
+  const pRows = res.people.map(p=>`<tr><td><b>${esc(personName(p.uid))}</b><div class="hint">${p.lines.map(esc).join('<br>')}</div></td>
+     <td class="num">${won(p.food)}</td>${isEqual?'':`<td class="num">${won(p.deliv+p.ext)}</td><td class="num">−${won(p.disc)}</td>`}<td class="num"><b>${won(p.pay)}</b></td></tr>`).join('');
+  const table = res.n ? `<div class="tbl-wrap"><table class="people"><thead><tr><th>참여자</th><th class="num">음식</th>${isEqual?'':'<th class="num">배달·추가</th><th class="num">할인</th>'}<th class="num">부담액</th></tr></thead>
+    <tbody>${pRows}</tbody><tfoot><tr><td>합계 ${res.n}명</td><td class="num">${won(res.F)}</td>${isEqual?'':`<td class="num">${won(res.D+res.X)}</td><td class="num">−${won(res.S)}</td>`}<td class="num">${won(res.sum)}</td></tr></tfoot></table></div>
+    <div class="sum-check">최종 결제 금액 <b>${won(res.T)}</b> = 음식 ${won(res.F)} + 배달비 ${won(res.D)} + 추가 ${won(res.X)} − 할인 ${won(res.S)}
+      <br>${res.ok?'<span class="ok">개인 부담액 합계가 결제 금액과 일치해요.</span>':'<span class="bad">합계가 맞지 않아요. 금액을 다시 확인해 주세요.</span>'}
+      ${isEqual && res.T % res.n ? `<br><span class="hint">나누어떨어지지 않는 ${res.T%res.n}원은 먼저 참여한 순서대로 1원씩 더 냈어요.</span>`:''}</div>`
+    : `<div class="empty"><p>아직 제출된 메뉴가 없어요.</p></div>`;
+
+  const waiting = !res.n ? '' : '';
+  let leaderBtns = '';
+  if (isLeader && state.canWrite){
+    if (st==='COLLECTING' || st==='EXPIRED' || st==='CREATED') leaderBtns = `<button class="btn" data-status="REVIEW" ${res.n?'':'disabled'}>주문 마감하고 검토하기</button>`;
+    else if (st==='REVIEW') leaderBtns = `<button class="btn" data-status="CONFIRMED">주문 확정하기</button><button class="btn alt" data-status="COLLECTING">메뉴 다시 받기</button>`;
+    else if (st==='CONFIRMED') leaderBtns = `<button class="btn" data-status="COMPLETED">수령 완료로 표시</button>`;
+    if (!['COMPLETED','CANCELLED'].includes(st)) leaderBtns += `<button class="btn alt" data-status="CANCELLED" style="border-color:var(--chili);color:var(--chili)">그룹 주문 취소</button>`;
+  }
+
+  $('#app').innerHTML = `
+    <p><button class="link" data-group-list>← 그룹 목록</button></p>
+    <div class="card-top" style="margin-top:4px"><div><h2 class="sect-title" style="margin:0">${esc(g.name)}</h2>
+      <div class="place">${esc(r.name)}${dl?`, ${hhmm(dl)} 마감${st==='COLLECTING'&&leftMin>=0?` (${leftMin}분 남음)`:''}`:''}${isLeader?', 내가 그룹장':''}</div></div>
+      <span class="status ${st}">${STATUS_LABEL[st]}</span></div>
+    ${['CANCELLED'].includes(st)?'':`<div class="steps">${steps}</div>`}
+    ${st==='EXPIRED'?'<p class="notice">마감 시각이 지났어요. 그룹장이 지금까지 모인 메뉴로 검토를 진행하거나 메뉴를 더 받을 수 있어요.</p>':''}
+
+    <h2 class="sect-title" style="font-size:19px">내 메뉴</h2>
+    <div class="card">${menuRows}
+      ${editable?`<label class="opt" style="margin-top:12px;color:var(--ink)">표시 이름 <input id="myNick" maxlength="10" placeholder="동료에게 보일 이름" value="${esc(mine&&mine.nick||ls.get('lf-nick',''))}" style="flex:1;border:1.5px solid var(--line);border-radius:8px;padding:8px;background:var(--surface-2)"></label>`:''}
+      <div class="track-meta" style="margin-top:12px"><span>내 음식 금액 <b>${won(draftTotal)}</b></span>${mine?'<span class="ok">제출됨</span>':'<span class="hint">아직 제출 전</span>'}</div>
+      ${editable?`<div class="card-actions"><button class="btn small" data-submit-order ${draft.length?'':'disabled'}>${mine?'메뉴 수정 저장':'메뉴 제출하기'}</button>${mine?'<button class="btn small alt" data-withdraw>참여 취소</button>':''}</div>`:
+        `<p class="hint" style="margin:10px 0 0">${state.canWrite?'주문이 마감되어 메뉴를 바꿀 수 없어요. 변경이 필요하면 그룹장에게 알려 주세요.':'보기 권한이라 메뉴를 제출할 수 없어요.'}</p>`}
+    </div>
+    ${!store.db && editable ? `<form class="stack" id="demoAdd" style="margin-top:4px"><label>체험용 참여자 추가<input name="nick" maxlength="10" placeholder="예: 민지" required></label><label>메뉴<select name="menu">${r.menus.map(m=>`<option value="${m.id}">${esc(m.name)} ${won(m.price)}</option>`).join('')}</select></label><button class="btn small alt" type="submit">참여자 추가</button></form>`:''}
+
+    <div class="results-head"><h2 style="font-size:19px">정산</h2>
+      <div class="toggle" role="group" aria-label="정산 방식"><button data-method="equal" aria-pressed="${isEqual}" ${(isLeader||!store.db)&&state.canWrite&&!g.snapshot?'':'disabled'}>균등 1/N</button><button data-method="item" aria-pressed="${!isEqual}" ${(isLeader||!store.db)&&state.canWrite&&!g.snapshot?'':'disabled'}>주문 금액별</button></div></div>
+    ${g.snapshot?'<p class="hint" style="margin:0 0 8px">주문 확정 시점의 메뉴 가격으로 고정된 정산이에요.</p>':''}
+    ${table}
+    <div class="cta-row">${leaderBtns}<button class="btn alt" data-share ${res.n?'':'disabled'}>정산 내역 공유하기</button><button class="btn alt" data-invite>동료 초대 문구 복사</button></div>
+    <p class="notice">LunchFit은 정산 금액 계산과 공유까지만 도와요. 실제 주문과 송금은 각자 진행해 주세요. 송금 완료 여부는 표시하지 않습니다.</p>`;
+  resolveProfiles(res.people.map(p=>p.uid).filter(u=>!u.startsWith('local:') && u!==state.myId));
+}
+
+async function openGroup(id){
+  if (unsubGroup) unsubGroup();
+  state.groupView='detail'; state.currentGroup=id; state.draft=null; state.group=null; state.orders={};
+  $('#app').innerHTML = '<p class="hint" style="margin-top:30px">그룹 주문을 불러오는 중…</p>';
+  unsubGroup = store.watchGroup(id, g=>{ state.group=g; if(!g){ state.groupView='list'; } if(state.tab==='group') renderGroup(); },
+    o=>{ state.orders=o; if(state.tab==='group' && state.group) renderGroup(); });
+}
+function closeGroup(){ if (unsubGroup){unsubGroup(); unsubGroup=null;} state.groupView='list'; state.group=null; state.draft=null; renderGroup(); }
+
+function shareText(kind){
+  const g=state.group, r=findR(g.restaurantId);
+  if (kind==='invite') return `[LunchFit 함께 주문]\n${g.name}\n식당: ${r.name}\n마감: ${hhmm(new Date(g.deadline))}\n\n이 링크를 열고 '함께 주문' 탭에서 그룹을 눌러 메뉴를 골라 주세요.`;
+  const res = settle(g, state.orders);
+  const lines = res.people.map(p=>`- ${personName(p.uid)==='나'?'그룹장':personName(p.uid)}: ${won(p.pay)}`).join('\n');
+  return `[LunchFit 정산] ${g.name} (${r.name})\n방식: ${g.method==='equal'?'균등 1/N':'주문 금액별'}\n최종 결제 ${won(res.T)} (음식 ${won(res.F)} + 배달비 ${won(res.D)} + 추가 ${won(res.X)} − 할인 ${won(res.S)})\n${lines}\n상태: ${STATUS_LABEL[effectiveStatus(g)]}${g.snapshot?'':' (확정 전 금액이에요)'}`;
+}
+async function copyOrShow(text, label){
+  try{ await navigator.clipboard.writeText(text); toast(label+' 복사했어요.'); return; }catch(e){}
+  $('#modalBody').innerHTML = `<button class="close-x" data-close aria-label="닫기">×</button><h2>${esc(label)}</h2><p class="hint">아래 내용을 길게 눌러 복사해 메신저에 붙여 넣으세요.</p><textarea class="share" readonly>${esc(text)}</textarea>`;
+  $('#modal').showModal(); $('#modal textarea').select();
+}
+
+/* ---------------- 공통 렌더 ---------------- */
+function render(){
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected', b.dataset.tab===state.tab));
+  if (state.tab==='home') renderHome();
+  else if (state.tab==='group') renderGroup();
+  else renderHistory();
+}
+function goTab(t){ state.tab=t; render(); window.scrollTo({top:0}); }
+
+/* ---------------- 이벤트 ---------------- */
+document.addEventListener('click', async e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  const d = b.dataset;
+  if (d.tab){ goTab(d.tab); return; }
+  if (d.tabGo){ goTab(d.tabGo); return; }
+  if (d.close !== undefined){ $('#modal').close(); return; }
+  if (d.pref){ state.prefs.has(d.pref)?state.prefs.delete(d.pref):state.prefs.add(d.pref); savePrefs(); renderHome(); return; }
+  if (d.meal){ state.meal=d.meal; savePrefs(); renderHome(); return; }
+  if (b.id==='goRecommend'){ state.showResults=true; renderHome(); $('#results')?.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); return; }
+  if (b.id==='goGroup'){ state.prefillR=null; state.tab='group'; state.groupView='new'; render(); return; }
+  if (d.relax){ if(d.relax==='time') state.minutes=Math.min(90,state.minutes+10); if(d.relax==='budget') state.budget=Math.min(20000,state.budget+2000); if(d.relax==='prefs') state.prefs.clear(); savePrefs(); renderHome(); $('#results')?.scrollIntoView(); return; }
+  if (d.detail){ openDetail(...d.detail.split('|')); return; }
+  if (d.choose){ choose(...d.choose.split('|')); return; }
+  if (d.groupFrom){ $('#modal').close(); state.prefillR=d.groupFrom; state.tab='group'; state.groupView='new'; render(); return; }
+  if (d.rate){ const [id,n]=d.rate.split('|'); const h=state.history.find(x=>x.id===id); if(h){h.rating=+n; ls.set('lf-history',state.history); renderHistory();} return; }
+  if (d.groupNew !== undefined){ state.prefillR=null; state.groupView='new'; renderGroup(); return; }
+  if (d.groupList !== undefined){ closeGroup(); return; }
+  if (d.openGroup){ openGroup(d.openGroup); return; }
+  if (d.qty){
+    const [mid,delta]=d.qty.split('|'); const dr=state.draft; let it=dr.find(x=>x.menuId===mid);
+    if (!it && +delta>0){ it={menuId:mid,qty:0,toppings:[]}; dr.push(it); }
+    if (it){ it.qty=Math.max(0,it.qty+ +delta); if(!it.qty) dr.splice(dr.indexOf(it),1); }
+    renderGroupDetail(); return;
+  }
+  if (d.submitOrder !== undefined){
+    const g=state.group; if(!state.draft.length) return;
+    b.disabled=true;
+    const nick = ($('#myNick')?.value || '').trim().slice(0,10); ls.set('lf-nick', nick);
+    try{ await store.setOrder(g.id, state.myId, {nick, items:state.draft, joinedAt: state.orders[state.myId]?.joinedAt || Date.now(), updatedAt:Date.now()});
+      if (g.status==='CREATED') await store.updateGroup(g.id,{status:'COLLECTING'});
+      state.draft=null; toast('메뉴를 제출했어요.'); }
+    catch(err){ handleWriteError(err); b.disabled=false; }
+    return;
+  }
+  if (d.withdraw !== undefined){ try{ await store.deleteOrder(state.group.id, state.myId); state.draft=[]; toast('참여를 취소했어요.'); }catch(err){handleWriteError(err);} return; }
+  if (d.method){ try{ await store.updateGroup(state.group.id,{method:d.method}); }catch(err){handleWriteError(err);} return; }
+  if (d.status){
+    const g=state.group; const patch={status:d.status};
+    if (d.status==='CANCELLED' && !confirm('이 그룹 주문을 취소할까요? 참여자 모두에게 취소로 표시돼요.')) return;
+    if (d.status==='CONFIRMED'){ const res=settle({...g, snapshot:null}, state.orders); patch.snapshot=res.people.map(p=>({uid:p.uid, food:p.food, lines:p.lines})); patch.confirmedAt=Date.now(); }
+    if (d.status==='COLLECTING'){ patch.snapshot=null; patch.deadline=Math.max(g.deadline||0, Date.now()+15*60000); }
+    try{ await store.updateGroup(g.id, patch); toast(STATUS_LABEL[d.status]+'(으)로 바꿨어요.'); }catch(err){handleWriteError(err);}
+    return;
+  }
+  if (d.share !== undefined){ copyOrShow(shareText('settle'),'정산 내역'); return; }
+  if (d.invite !== undefined){ copyOrShow(shareText('invite'),'초대 문구'); return; }
+});
+document.addEventListener('input', e=>{
+  if (e.target.id==='myNick'){ ls.set('lf-nick', e.target.value.trim().slice(0,10)); }
+  if (e.target.id==='minRange'){ state.minutes=+e.target.value; $('#minNum').textContent=state.minutes; $('#minSub').textContent=`지금 출발하면 ${hhmm(new Date(Date.now()+state.minutes*60000))}까지 자리로 돌아오는 일정이에요.`; savePrefs(); if(state.showResults){ const y=scrollY; renderHome(); scrollTo(0,y); $('#minRange').focus(); } }
+  if (e.target.id==='budRange'){ state.budget=+e.target.value; $('#budNum').textContent=won(state.budget); savePrefs(); if(state.showResults){ const y=scrollY; renderHome(); scrollTo(0,y); $('#budRange').focus(); } }
+});
+document.addEventListener('change', e=>{
+  const t=e.target;
+  if (t.id==='sortSel'){ state.sort=t.value; const y=scrollY; renderHome(); scrollTo(0,y); }
+  if (t.id==='newGroupR'){ const r=findR(t.value); $('#newGroupFee').value = r.modes.includes('delivery') ? r.deliveryFee : 0; }
+  if (t.dataset.top){ const [mid,tid]=t.dataset.top.split('|'); const it=state.draft.find(x=>x.menuId===mid); if(it){ it.toppings=it.toppings||[]; t.checked?it.toppings.push(tid):it.toppings.splice(it.toppings.indexOf(tid),1); } renderGroupDetail(); }
+  if (t.dataset.actual){ const h=state.history.find(x=>x.id===t.dataset.actual); if(h){ h.actual=+t.value||null; ls.set('lf-history',state.history); renderHistory(); } }
+});
+document.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const f=e.target, fd=new FormData(f);
+  if (f.id==='newGroupForm'){
+    const [hh,mm]=fd.get('deadline').split(':').map(Number); const dl=new Date(); dl.setHours(hh,mm,0,0); if(dl<Date.now()) dl.setDate(dl.getDate()+1);
+    const data={name:fd.get('name').trim(), restaurantId:fd.get('restaurantId'), deadline:dl.getTime(), deliveryFee:+fd.get('deliveryFee')||0, discount:+fd.get('discount')||0, extra:+fd.get('extra')||0,
+      method:'equal', status:'COLLECTING', createdBy:state.myId, createdAt:Date.now(), snapshot:null};
+    f.querySelector('button[type=submit]').disabled=true;
+    try{ const id=await store.createGroup(data); toast('그룹을 만들었어요. 초대 문구를 복사해 동료에게 보내세요.'); openGroup(id); }
+    catch(err){ handleWriteError(err); f.querySelector('button[type=submit]').disabled=false; }
+  }
+  if (f.id==='demoAdd'){
+    const nick=fd.get('nick').trim(); if(!nick) return;
+    await store.setOrder(state.group.id, 'local:'+nick, {items:[{menuId:fd.get('menu'),qty:1,toppings:[]}], joinedAt:Date.now()});
+    toast(nick+'님을 추가했어요.');
+  }
+});
+$('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') $('#modal').close(); });
+function handleWriteError(err){
+  console.warn(err);
+  if (err && err.code==='invalid_argument'){ state.canWrite=false; toast('이 링크에서는 저장할 권한이 없어요.'); render(); }
+  else if (err && err.code==='quota_exceeded') toast('저장 공간이 가득 찼어요. 지난 그룹을 정리한 뒤 다시 시도해 주세요.');
+  else toast('저장하지 못했어요. 잠시 후 다시 시도해 주세요.');
+}
+setInterval(()=>{ if(state.tab==='group' && state.groupView==='detail' && state.group && !document.querySelector('input:focus,select:focus')) renderGroupDetail(); }, 60000);
+
+/* ---------------- 시작 ---------------- */
+let userCap = null;
+function startLocal(){
+  store.db=null; state.myId = state.myId || 'local:나'; state.shared=false;
+  $('#modeNote').textContent='체험 모드 (이 기기에만 저장)';
+  if (unsubGroups) unsubGroups();
+  unsubGroups = store.watchGroups(gs=>{ state.groups=gs; if(state.tab==='group' && state.groupView==='list') renderGroup(); });
+}
+render();
+startLocal();
+(async ()=>{
+  if (!(window.claude && window.claude.use)) return;
+  try{
+    const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    userCap = user;
+    const id = user ? await user.id() : null;
+    if (!db || !id) return;
+    const can = await user.can('data.write');
+    store.db = db; state.myId = id; state.shared = true; if (can === false) state.canWrite = false;
+    $('#modeNote').textContent = '공유 모드 (링크 참여자와 실시간 공유)';
+    local.subs.clear();
+    if (unsubGroups) unsubGroups();
+    unsubGroups = store.watchGroups(gs=>{ state.groups=gs; if(state.tab==='group' && state.groupView==='list') renderGroup(); });
+    if (state.tab==='group'){ state.groupView='list'; render(); }
+  }catch(e){ console.warn(e); }
+})();
+</script>
+</body>
+</html>
